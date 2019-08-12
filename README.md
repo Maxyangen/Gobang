@@ -1,0 +1,2 @@
+# WebGobang
+Gobang bang bang
