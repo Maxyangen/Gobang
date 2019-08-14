@@ -1,35 +1,34 @@
 var canvas;
 var canvasContext;
 var chess = new Array(17);
-var isBlack;
-var WHITECHESS = 'white';
-var BLACKVHESS = 'black';
+var WHITECHESS = { color: 'white', name: "White"};
+var BLACKCHESS = { color: 'black', name: "Black"};
+var currentTeam = BLACKCHESS;
 var isWin;
-var dialog
+var dialog;
 
 
-function startGame(){
+function startGame() {
     document.addEventListener('contextmenu', event => event.preventDefault());
-    document.addEventListener("click",playerPutChess);
+    document.addEventListener("click", playerPutChess);
     dialog = document.getElementById("dialog");
     initData();
     drawChessBoard();
 }
 
-function initData(){
-    for(var i = 0 ; i < 17; i++)
+function initData() {
+    for (var i = 0; i < 17; i++)
         chess[i] = new Array(17);
 
-    for(var i = 0 ; i < 17; i++)
-        for(var j = 0 ; j < 17; j++)
+    for (var i = 0; i < 17; i++)
+        for (var j = 0; j < 17; j++)
             chess[i][j] = 0;
 
-    isBlack = true;
+    currentTeam = BLACKCHESS;
     isWin = false;
-
 }
 
-function drawChessBoard(){
+function drawChessBoard() {
     canvas = document.getElementById('canvas_id');
     canvasContext = canvas.getContext('2d');
 
@@ -51,7 +50,7 @@ function drawChessBoard(){
 
 }
 
-function playerPutChess(e){
+function playerPutChess(e) {
     console.log("mouse click x coor" + e.clientX);
     console.log("mouse click y coor" + e.clientY);
 
@@ -60,39 +59,29 @@ function playerPutChess(e){
     var y = parseInt(e.clientY / 40);
 
     console.log(x + " " + y);
-    if( x <= 0 || x > 15|| y <= 0 || y > 15 || chess[y][x] != 0){
+    if (x <= 0 || x > 15 || y <= 0 || y > 15 || chess[y][x] !== 0) {
         alert("replay");
         return;
     }
-        
-    if(isBlack){
-        drawChess(BLACKVHESS,x*40,y*40);
-        chess[y][x] = 2;
-    }
-        
-    else{
-        drawChess(WHITECHESS,x*40,y*40);
-        chess[y][x] = 1;
-    }
-        
-    checkWinner(isBlack+1 , y,x);
 
-    isBlack = !isBlack;
-        
-    
+    drawChess(currentTeam.color, x * 40, y * 40);
+    chess[y][x] = currentTeam;
+    checkWinner(currentTeam, y, x);
+
+    currentTeam = currentTeam === BLACKCHESS ? WHITECHESS : BLACKCHESS;
 
 }
 
-var drawChess = function (chessColor,x,y){
+var drawChess = function (chessColor, x, y) {
     canvasContext.beginPath();
-    canvasContext.arc(x,y,15,0,360,false);
+    canvasContext.arc(x, y, 15, 0, 360, false);
     canvasContext.fillStyle = chessColor;
     canvasContext.fill();
     canvasContext.closePath();
-}
+};
 
 
-function checkWinner(chessColor,x,y){
+function checkWinner(chessTeam, x, y) {
 
     var checkUpDown = 0;
     var checkLeftRight = 0;
@@ -100,65 +89,60 @@ function checkWinner(chessColor,x,y){
     var checkRightDiagonal = 0;
 
 
-    for(var i = y; i > 0; i--){
-        if(chess[x][i] != chessColor)
+    for (var i = y; i > 0; i--) {
+        if (chess[x][i] !== chessTeam)
             break;
         checkLeftRight++;
     }
-    for(var i = y+1; i < 15; i++){
-        if(chess[x][i] != chessColor)
+
+    for (var i = y + 1; i < 15; i++) {
+        if (chess[x][i] !== chessTeam)
             break;
         checkLeftRight++;
     }
 
 
-    for(var i = x; i > 0; i--){
-        if(chess[i][y] != chessColor)
+    for (var i = x; i > 0; i--) {
+        if (chess[i][y] !== chessTeam)
             break;
         checkUpDown++;
     }
-    for(var i = x+1; i < 15; i++){
-        if(chess[i][y] != chessColor)
+    for (var i = x + 1; i < 15; i++) {
+        if (chess[i][y] !== chessTeam)
             break;
         checkLeftRight++;
     }
 
-    for(var i = x,j = y; i > 0,j > 0; i--,j--){
-        if(chess[i][j] != chessColor)
+    for (var i = x, j = y; i > 0, j > 0; i-- , j--) {
+        if (chess[i][j] !== chessTeam)
             break;
         checkLeftDiagonal++;
     }
-    for(var i = x+1,j = y+1; i < 15,j < 15; i++,j++){
-        if(chess[i][j] != chessColor)
+    for (var i = x + 1, j = y + 1; i < 15, j < 15; i++ , j++) {
+        if (chess[i][j] !== chessTeam)
             break;
         checkLeftDiagonal++;
     }
 
-    for(var i = x,j = y; i > 0,j < 15; i--,j++){
-        if(chess[i][j] != chessColor)
+    for (var i = x, j = y; i > 0, j < 15; i-- , j++) {
+        if (chess[i][j] !== chessTeam)
             break;
         checkRightDiagonal++;
     }
-    for(var i = x+1,j = y-1; i < 15,j > 0; i++,j--){
-        if(chess[i][j] != chessColor)
+    for (var i = x + 1, j = y - 1; i < 15, j > 0; i++ , j--) {
+        if (chess[i][j] !== chessTeam)
             break;
         checkRightDiagonal++;
     }
 
-    console.log("checkWinner : "   + checkLeftRight);
-    console.log("checkColor : " + chessColor);
+    console.log("checkWinner : " + checkLeftRight);
+    console.log("checkColor : " + chessTeam);
 
-    var winner;
-    if(checkUpDown >= 5 || checkLeftRight >= 5 || checkLeftDiagonal >= 5 || checkRightDiagonal >= 5){
-        if(chessColor == 1)
-            winner = "White Player is Winner!!";
-        else
-            winner = "Black Player is Winner!!";
-        
+    if (checkUpDown >= 5 || checkLeftRight >= 5 || checkLeftDiagonal >= 5 || checkRightDiagonal >= 5) {
         isWin = true;
         dialog.style.display = "block";
-        dialog.innerHTML=winner;
-        canvasContext.clearRect(0,0,640,640);
+        dialog.innerHTML = chessTeam.name + " Player is Winner!!";
+        canvasContext.clearRect(0, 0, 640, 640);
         startGame();
     }
 
